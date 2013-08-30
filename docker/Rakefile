@@ -1,0 +1,11 @@
+#require 'bundler/setup'
+
+desc "Connect to Docker image's shell"
+task :shell, :name do |t, args|
+  sh "sudo docker run -t -i #{args.name} /bin/bash"
+end
+
+desc "Build Docker image"
+task :build, :name do |t, args|
+  sh "sudo docker build -t='#{args.name}' ."
+end
