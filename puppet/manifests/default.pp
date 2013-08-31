@@ -53,18 +53,9 @@ class { 'apt_get_update':
 
 # --- Docker -------------------------------------------------------------------
 
-
-
-
-
 package { 'lxc-docker':
   ensure => installed
 }
-# exec { 'install_docker':
-#   command => "apt-get update; apt-get install lxc-docker",
-#   require => Exec['install_docker_repo']
-# }
-
 
 # --- SQLite -------------------------------------------------------------------
 
@@ -117,16 +108,7 @@ package { 'build-essential':
   ensure => installed
 }
 
-package { 'git-core':
-  ensure => installed
-}
-
-# Nokogiri dependencies.
-package { ['libxml2', 'libxml2-dev', 'libxslt1-dev']:
-  ensure => installed
-}
-
-# ExecJS runtime.
+# ExecJS runtime. The old Node.js will suffice.
 package { 'nodejs':
   ensure => installed
 }
@@ -146,40 +128,70 @@ package { 'vim':
   ensure => installed
 }
 
-# --- Ruby ---------------------------------------------------------------------
-
-# exec { 'install_rvm':
-#   command => "${as_vagrant} 'curl -L https://get.rvm.io | bash -s stable'",
-#   creates => "${home}/.rvm/bin/rvm",
-#   require => Package['curl']
-# }
-
-# exec { 'install_ruby':
-#   # We run the rvm executable directly because the shell function assumes an
-#   # interactive environment, in particular to display messages or ask questions.
-#   # The rvm executable is more suitable for automated installs.
-#   #
-#   # Thanks to @mpapis for this tip.
-#   command => "${as_vagrant} '${home}/.rvm/bin/rvm install 2.0.0 --latest-binary --autolibs=enabled && rvm --fuzzy alias create default 2.0.0'",
-#   creates => "${home}/.rvm/bin/ruby",
-#   require => Exec['install_rvm']
-# }
-
-# exec { "${as_vagrant} 'gem install bundler --no-rdoc --no-ri'":
-#   creates => "${home}/.rvm/bin/bundle",
-#   require => Exec['install_ruby']
-# }
-
-host { 'rails.dev':
-    ip => '127.0.0.1',
+group { "docker":
+  ensure => "present",
 }
 
+# Manage the vagrant user
 user { "vagrant":
   ensure     => "present",
   managehome => true,
   shell => "/bin/zsh"
 }
 
-group { "logusers":
-    ensure => "present",
+exec {"vagrant user docker membership":
+  unless => "grep -q 'docker\\S*vagrant' /etc/group",
+  command => "usermod -aG docker vagrant",
+  require => User['vagrant'],
 }
+
+# --- Ruby ---------------------------------------------------------------------
+
+# Install Ruby dependencies
+
+package { ['bison', 'openssl', 'libreadline6','libreadline6-dev', 'git-core',
+ 'zlib1g', 'zlib1g-dev', 'libssl-dev', 'libyaml-dev', 'libxml2-dev', 'autoconf',
+ 'libxslt1-dev', 'libc6-dev', 'libncurses5-dev', 'automake', 'libtool']:
+  ensure => installed
+}
+
+class { 'rbenv': }->rbenv::plugin { [ 'sstephenson/rbenv-vars', 'sstephenson/ruby-build' ]: }
+rbenv::build { '2.0.0-p247': global => true }->
+rbenv::gem { 'bundler': ruby_version => '2.0.0-p247' }->
+rbenv::gem { 'pry': ruby_version => '2.0.0-p247' }
+
+# Configure RBenv systemwide
+
+exec {"rbenv_setup":
+  command => "echo '# rbenv setup' > /etc/profile.d/rbenv.sh",
+  require  => Class['rbenv']
+}
+exec {"rbenv_root":
+  command => "echo 'export RBENV_ROOT=/usr/local/rbenv' >> /etc/profile.d/rbenv.sh",
+  require => Exec['rbenv_setup'],
+}
+exec {"rbenv_path":
+  command => "echo 'export PATH=\"/usr/local/rbenv/bin:\$PATH\"' >> /etc/profile.d/rbenv.sh",
+  require => Exec['rbenv_root'],
+}
+exec {"rbenv_init":
+  command => "echo 'eval \"$(rbenv init -)\"' >> /etc/profile.d/rbenv.sh",
+  require => Exec['rbenv_path'],
+}
+exec {"rbenv_make_exec":
+  command => "chmod +x /etc/profile.d/rbenv.sh",
+  require => Exec['rbenv_init'],
+}
+exec {"add_profile_to_zsh":
+  command => "echo '. /etc/profile' >> /etc/zsh/zshrc",
+  require => Exec['rbenv_make_exec'],
+}
+# exec {"rbenv_source_it":
+#   command => "source /etc/profile.d/rbenv.sh",
+#   require => Exec['rbenv_make_exec'],
+# }
+
+host { 'rails.dev':
+    ip => '127.0.0.1',
+}
+
