@@ -1,0 +1,37 @@
+{
+  "name": "b0d0nne11-ruby_build",
+  "version": "0.0.3",
+  "source": "UNKNOWN",
+  "author": "b0d0nne11",
+  "license": "Apache License, Version 2.0",
+  "summary": "Install ruby-build and setup resources to manage ruby and gem versions",
+  "description": "UNKNOWN",
+  "project_page": "https://github.com/b0d0nne11/puppet-modules/tree/master/b0d0nne11-ruby_build",
+  "dependencies": [
+    {
+      "name": "puppetlabs/git",
+      "version_requirement": ">= 0.0.2"
+    },
+    {
+      "name": "b0d0nne11/build_essential",
+      "version_requirement": ">= 0.0.1"
+    },
+    {
+      "name": "b0d0nne11/rbenv",
+      "version_requirement": ">= 0.0.1"
+    }
+  ],
+  "types": [
+
+  ],
+  "checksums": {
+    "Modulefile": "51e4b2852ab9214abf6da73927209b90",
+    "README.md": "972c93d8f4bf212575cddbdd6fac09e0",
+    "manifests/init.pp": "138c51cffb247ebf1e702221b95b0c1a",
+    "manifests/params.pp": "9ef6fc2073ac4ac3c5bb8b06ebdd1c7a",
+    "manifests/resource/gem.pp": "c75b3b3555d4bf1d23fcb0192cb0dc8f",
+    "manifests/resource/ruby.pp": "fbdb8f17563e66e6d03c0ebddb730fe0",
+    "spec/spec_helper.rb": "a55d1e6483344f8ec6963fcb2c220372",
+    "tests/init.pp": "44e816d0677833dac5d9c79df270a196"
+  }
+}

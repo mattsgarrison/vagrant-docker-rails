@@ -1,0 +1,28 @@
+{
+  "name": "b0d0nne11-rbenv",
+  "version": "0.0.1",
+  "source": "UNKNOWN",
+  "author": "b0d0nne11",
+  "license": "Apache License, Version 2.0",
+  "summary": "Install rbenv",
+  "description": "UNKNOWN",
+  "project_page": "https://github.com/b0d0nne11/puppet-modules/tree/master/b0d0nne11-rbenv",
+  "dependencies": [
+    {
+      "name": "puppetlabs/git",
+      "version_requirement": ">= 0.0.2"
+    }
+  ],
+  "types": [
+
+  ],
+  "checksums": {
+    "Modulefile": "3f66dbe7268b3f5b6ed430e07f7f2fb5",
+    "README.md": "24d3b188d6c97afe3b8fe4e7f1c99e69",
+    "manifests/init.pp": "74d2d27d096dc1572f1d32841da0d2ab",
+    "manifests/params.pp": "9a70c5401009c7a0c1b743211e6855c5",
+    "spec/spec_helper.rb": "a55d1e6483344f8ec6963fcb2c220372",
+    "templates/rbenv.sh": "1895fedb6a7fdc5feed9b2cbbb8bbb60",
+    "tests/init.pp": "44e816d0677833dac5d9c79df270a196"
+  }
+}

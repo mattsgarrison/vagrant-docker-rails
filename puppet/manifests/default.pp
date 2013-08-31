@@ -177,4 +177,9 @@ host { 'rails.dev':
 user { "vagrant":
   ensure     => "present",
   managehome => true,
+  shell => "/bin/zsh"
+}
+
+group { "logusers":
+    ensure => "present",
 }

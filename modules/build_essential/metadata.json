@@ -1,0 +1,24 @@
+{
+  "name": "b0d0nne11-build_essential",
+  "version": "0.0.2",
+  "source": "UNKNOWN",
+  "author": "b0d0nne11",
+  "license": "Apache License, Version 2.0",
+  "summary": "Install build-essential",
+  "description": "UNKNOWN",
+  "project_page": "https://github.com/b0d0nne11/puppet-modules/tree/master/b0d0nne11-build_essential",
+  "dependencies": [
+
+  ],
+  "types": [
+
+  ],
+  "checksums": {
+    "Modulefile": "e0840368228e24274514e66054bad7ab",
+    "README.md": "14681ad31a7a05f6d098e1f6c3db5f9c",
+    "manifests/init.pp": "780aa0468bd12cb77d748f0a8e2d5543",
+    "manifests/resource/build_package.pp": "f9448778566ab530f84def5bdabb53da",
+    "spec/spec_helper.rb": "a55d1e6483344f8ec6963fcb2c220372",
+    "tests/init.pp": "44e816d0677833dac5d9c79df270a196"
+  }
+}
