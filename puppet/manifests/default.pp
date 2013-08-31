@@ -23,6 +23,26 @@ class apt_get_update {
     require => Exec['update_apt-get']
   }
 
+  package { 'build-essential':
+    ensure => installed,
+    require => Exec['update_apt-get']
+  }
+
+  package { 'python-software-properties':
+    ensure => installed,
+    require => Exec['update_apt-get']
+  }
+
+  package { 'python':
+    ensure => installed,
+    require => Exec['update_apt-get']
+  }
+
+  exec { 'add_node_repo':
+    command => 'add-apt-repository ppa:chris-lea/node.js'
+    require => Exec['update_apt-get']
+  }
+
   package { 'curl':
     ensure => latest
   }
@@ -41,6 +61,7 @@ class apt_get_update {
     command => "sh -c 'echo deb https://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list'",
     require => Exec['install_docker_repo_key']
   }
+
 
   exec { 'apt-get -y update':
     #unless => "test -e ${home}/.rvm",
@@ -104,10 +125,6 @@ class { 'memcached': }
 
 # --- Packages -----------------------------------------------------------------
 
-package { 'build-essential':
-  ensure => installed
-}
-
 # ExecJS runtime. The old Node.js will suffice.
 package { 'nodejs':
   ensure => installed
@@ -120,6 +137,11 @@ package { 'zsh':
 
 # Install byobu
 package { 'byobu':
+  ensure => installed
+}
+
+# Install node
+packge { 'nodeks':
   ensure => installed
 }
 
@@ -190,6 +212,15 @@ exec {"add_profile_to_zsh":
 #   command => "source /etc/profile.d/rbenv.sh",
 #   require => Exec['rbenv_make_exec'],
 # }
+
+
+# ---  Install PhantomJS -------------------------------------------------------
+
+# sudo wget http://phantomjs.googlecode.com/files/phantomjs-1.9.1-linux-x86_64.tar.bz2
+# sudo tar xjf phantomjs-1.9.1-linux-x86_64.tar.bz2
+# sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/local/share/phantomjs
+# sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs
+# sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/bin/phantomjs
 
 host { 'rails.dev':
     ip => '127.0.0.1',
