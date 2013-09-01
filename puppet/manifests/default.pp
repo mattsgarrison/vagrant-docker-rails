@@ -221,9 +221,10 @@ exec {"add_profile_to_zsh":
 
 # ---  Install PhantomJS -------------------------------------------------------
 
-# sudo wget http://phantomjs.googlecode.com/files/phantomjs-1.9.1-linux-x86_64.tar.bz2
-
-
+# PhantomJS Dependency
+package { 'fontconfig':
+  ensure => installed
+}
 
 exec {"phantom_wget":
   command => "wget http://phantomjs.googlecode.com/files/phantomjs-1.9.1-linux-x86_64.tar.bz2 -O /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
@@ -239,23 +240,11 @@ exec {"phantom_untar":
   require => [ Package["tar"], Exec["phantom_wget"] ],
 }
 
-# # sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/local/share/phantomjs
-file { '/tmp/phantomjs-1.9.1-linux-x86_64/bin/phantomjs':
-   ensure => 'link',
-   target => '/usr/local/share/phantomjs',
-   require => Exec['phantom_untar'],
-}
-# # sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs
-file { '/tmp/phantomjs-1.9.1-linux-x86_64/bin/phantomjs':
-   ensure => 'link',
-   target => '/usr/bin/phantomjs',
-   require => Exec['phantom_untar'],
-}
-# # sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/bin/phantomjs
-file { '/tmp/phantomjs-1.9.1-linux-x86_64/bin/phantomjs':
-   ensure => 'link',
-   target => '/usr/local/bin/phantomjs',
-   require => Exec['phantom_untar'],
+file { 'symlink_phantom':
+  target => '/tmp/phantomjs-1.9.1-linux-x86_64/bin/phantomjs',
+  ensure => 'link',
+  path => '/usr/local/bin/phantomjs',
+  require => Exec['phantom_untar'],
 }
 host { 'rails.dev':
     ip => '127.0.0.1',
