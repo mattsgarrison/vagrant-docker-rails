@@ -218,20 +218,26 @@ exec {"add_profile_to_zsh":
 
 # sudo wget http://phantomjs.googlecode.com/files/phantomjs-1.9.1-linux-x86_64.tar.bz2
 
+
+$filename = "phantomjs-${version}-linux-${platid}.tar.bz2"
+$phantom_src_path = "/usr/local/src/phantomjs-${version}/"
+$phantom_bin_path = "/opt/phantomjs"
+
+file { $phantom_src_path : ensure => directory }
+
 exec {"phantom_wget":
-            command => "/usr/bin/wget http://phantomjs.googlecode.com/files/phantomjs-1.9.1-linux-x86_64.tar.bz2
- -O /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
-            unless  => "test -f /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
-            require => [ Package["wget"] ],
-    }
+  command => "/usr/bin/wget http://phantomjs.googlecode.com/files/phantomjs-1.9.1-linux-x86_64.tar.bz2 -O /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
+  unless  => "test -f /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
+  require => [ Package["wget"] ],
+}
 
 # sudo tar xjf phantomjs-1.9.1-linux-x86_64.tar.bz2
 exec {"phantom_unzip":
-            cwd     => "/tmp/phantomjs-1.9.1",
-            command => "/usr/bin/tar -xf /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
-            unless  => "test -f /tmp/phantomjs-1.9.1",
-            require => [ Package["tar"], Exec["phantom_wget"] ],
-    }
+  cwd     => "/tmp/phantomjs-1.9.1",
+  command => "/usr/bin/tar -xf /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
+  unless  => "test -f /tmp/phantomjs-1.9.1",
+  require => [ Package["tar"], Exec["phantom_wget"] ],
+}
 
 # # sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/local/share/phantomjs
 # file { '/tmp/link-to-motd':
