@@ -140,13 +140,18 @@ package { 'byobu':
   ensure => installed
 }
 
-# Install node
-packge { 'nodejs':
+# Install zsh
+package { 'vim':
   ensure => installed
 }
 
-# Install zsh
-package { 'vim':
+# Install tar
+package { 'tar':
+  ensure => installed
+}
+
+# Install wget
+package { 'wget':
   ensure => installed
 }
 
@@ -219,42 +224,40 @@ exec {"add_profile_to_zsh":
 # sudo wget http://phantomjs.googlecode.com/files/phantomjs-1.9.1-linux-x86_64.tar.bz2
 
 
-$filename = "phantomjs-${version}-linux-${platid}.tar.bz2"
-$phantom_src_path = "/usr/local/src/phantomjs-${version}/"
-$phantom_bin_path = "/opt/phantomjs"
-
-file { $phantom_src_path : ensure => directory }
 
 exec {"phantom_wget":
-  command => "/usr/bin/wget http://phantomjs.googlecode.com/files/phantomjs-1.9.1-linux-x86_64.tar.bz2 -O /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
+  command => "wget http://phantomjs.googlecode.com/files/phantomjs-1.9.1-linux-x86_64.tar.bz2 -O /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
   unless  => "test -f /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
   require => [ Package["wget"] ],
 }
 
 # sudo tar xjf phantomjs-1.9.1-linux-x86_64.tar.bz2
-exec {"phantom_unzip":
-  cwd     => "/tmp/phantomjs-1.9.1",
-  command => "/usr/bin/tar -xf /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
-  unless  => "test -f /tmp/phantomjs-1.9.1",
+exec {"phantom_untar":
+  cwd     => "/tmp/",
+  command => "tar -xf /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2 phantomjs-1.9.1-linux-x86_64",
+  unless  => "test -d /tmp/phantomjs-1.9.1-linux-x86_64",
   require => [ Package["tar"], Exec["phantom_wget"] ],
 }
 
 # # sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/local/share/phantomjs
-# file { '/tmp/link-to-motd':
-#    ensure => 'link',
-#    target => '/etc/motd',
-# }
+file { '/tmp/phantomjs-1.9.1-linux-x86_64/bin/phantomjs':
+   ensure => 'link',
+   target => '/usr/local/share/phantomjs',
+   require => Exec['phantom_untar'],
+}
 # # sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs
-# file { '/tmp/link-to-motd':
-#    ensure => 'link',
-#    target => '/etc/motd',
-# }
+file { '/tmp/phantomjs-1.9.1-linux-x86_64/bin/phantomjs':
+   ensure => 'link',
+   target => '/usr/bin/phantomjs',
+   require => Exec['phantom_untar'],
+}
 # # sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/bin/phantomjs
-# file { '/tmp/link-to-motd':
-#    ensure => 'link',
-#    target => '/etc/motd',
-# }
-# host { 'rails.dev':
-#     ip => '127.0.0.1',
-# }
+file { '/tmp/phantomjs-1.9.1-linux-x86_64/bin/phantomjs':
+   ensure => 'link',
+   target => '/usr/local/bin/phantomjs',
+   require => Exec['phantom_untar'],
+}
+host { 'rails.dev':
+    ip => '127.0.0.1',
+}
 
