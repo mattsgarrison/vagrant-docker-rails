@@ -217,12 +217,38 @@ exec {"add_profile_to_zsh":
 # ---  Install PhantomJS -------------------------------------------------------
 
 # sudo wget http://phantomjs.googlecode.com/files/phantomjs-1.9.1-linux-x86_64.tar.bz2
-# sudo tar xjf phantomjs-1.9.1-linux-x86_64.tar.bz2
-# sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/local/share/phantomjs
-# sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs
-# sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/bin/phantomjs
 
-host { 'rails.dev':
-    ip => '127.0.0.1',
-}
+exec {"apps_wget":
+            command => "/usr/bin/wget http://phantomjs.googlecode.com/files/phantomjs-1.9.1-linux-x86_64.tar.bz2
+ -O /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
+            unless  => "test -f /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
+            require => [ Package["wget"] ],
+    }
+
+# sudo tar xjf phantomjs-1.9.1-linux-x86_64.tar.bz2
+exec {"apps_unzip":
+            cwd     => "/tmp/phantomjs-1.9.1",
+            command => "/usr/bin/tar -xf /tmp/phantomjs-1.9.1-linux-x86_64.tar.bz2",
+            unless  => "test -f /tmp/phantomjs-1.9.1",
+            require => [ Package["tar"], Exec["container_wget"] ],
+    }
+
+# # sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/local/share/phantomjs
+# file { '/tmp/link-to-motd':
+#    ensure => 'link',
+#    target => '/etc/motd',
+# }
+# # sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs
+# file { '/tmp/link-to-motd':
+#    ensure => 'link',
+#    target => '/etc/motd',
+# }
+# # sudo ln -s /usr/local/share/phantomjs-1.9.1-linux-x86_64/bin/phantomjs /usr/bin/phantomjs
+# file { '/tmp/link-to-motd':
+#    ensure => 'link',
+#    target => '/etc/motd',
+# }
+# host { 'rails.dev':
+#     ip => '127.0.0.1',
+# }
 
