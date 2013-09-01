@@ -39,7 +39,7 @@ class apt_get_update {
   }
 
   exec { 'add_node_repo':
-    command => 'add-apt-repository ppa:chris-lea/node.js'
+    command => 'add-apt-repository ppa:chris-lea/node.js',
     require => Exec['update_apt-get']
   }
 
