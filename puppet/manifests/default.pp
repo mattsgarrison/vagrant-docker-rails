@@ -141,7 +141,7 @@ package { 'byobu':
 }
 
 # Install node
-packge { 'nodeks':
+packge { 'nodejs':
   ensure => installed
 }
 
