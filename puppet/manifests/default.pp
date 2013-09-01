@@ -127,7 +127,7 @@ class { 'memcached': }
 
 # ExecJS runtime. The old Node.js will suffice.
 package { 'nodejs':
-  ensure => installed
+  ensure => latest
 }
 
 # Install zsh
