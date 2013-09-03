@@ -49,8 +49,7 @@ define rbenv::plugin(
     unless  => "test -d ${install_dir}/plugins/${plugin[1]}",
   }~>
   exec { "rbenv-permissions-${name}":
-    command     => "chown -R ${owner}:${group} ${install_dir} && \
-                    chmod -R g+w ${install_dir}",
+    command     => "chown -R ${owner}:${group} ${install_dir} && chmod -R g+w ${install_dir}",
     path        => [ '/bin' ],
     refreshonly => true,
   }

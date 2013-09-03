@@ -49,16 +49,14 @@
 # Copyright 2013 Justin Downing
 #
 class rbenv (
-  $repo_path   = 'git://github.com/sstephenson/rbenv.git',
+  $repo_path   = 'https://github.com/sstephenson/rbenv.git',
   $install_dir = '/usr/local/rbenv',
   $owner       = 'root',
   $group       = 'adm'
 ) {
 
   exec { 'git-clone-rbenv':
-    command => "/usr/bin/git clone \
-               ${rbenv::repo_path} \
-               ${install_dir}",
+    command => "/usr/bin/git clone ${rbenv::repo_path} ${install_dir}",
     creates => $install_dir,
     user    => $owner,
   }
