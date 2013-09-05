@@ -1,6 +1,9 @@
 $ar_databases = ['activerecord_unittest', 'activerecord_unittest2']
 $as_vagrant   = 'sudo -u vagrant -H bash -l -c'
-$home         = '/home/vagrant'
+$user         = 'vagrant'
+$home         = '/home/${vagrant}'
+$ruby_version = '2.0.0-p247'
+
 
 Exec {
   path => ['/usr/sbin', '/usr/bin', '/sbin', '/bin']
@@ -123,11 +126,31 @@ package { ['sqlite3', 'libsqlite3-dev']:
 
 class { 'memcached': }
 
+
+
 # --- Packages -----------------------------------------------------------------
+
+# Install Ruby dependencies
+
+package { ['bison', 'openssl', 'libreadline6','libreadline6-dev', 'git', 'git-core',
+ 'zlib1g', 'zlib1g-dev', 'libssl-dev', 'libyaml-dev', 'libxml2-dev', 'autoconf',
+ 'libxslt1-dev', 'libc6-dev', 'libncurses5-dev', 'automake', 'libtool']:
+  ensure => installed
+}
 
 # ExecJS runtime. The old Node.js will suffice.
 package { 'nodejs':
   ensure => latest
+}
+
+# Image Magick 
+package { ['imagemagick','graphicsmagick','graphicsmagick-libmagick-dev-compat']:
+  ensure => installed
+}
+
+# Redis
+package { 'redis-server':
+  ensure => installed
 }
 
 # Install zsh
@@ -155,37 +178,92 @@ package { 'wget':
   ensure => installed
 }
 
+# Install Docker
 group { "docker":
   ensure => "present",
 }
 
-# Manage the vagrant user
-user { "vagrant":
+# Install ack or the silver searcher
+# Install ctags
+ package { 'tree':
+    ensure => installed,
+  }
+
+# --- Manage the vagrant user --------------------------------------------------
+user { $user:
   ensure     => "present",
+  home    => $home,
   managehome => true,
   shell => "/bin/zsh"
 }
+file { $home:
+    ensure  => directory,
+    group   => $user,
+    owner   => $user,
+    mode    => 0700,
+}
 
-exec {"vagrant user docker membership":
+exec {"vagrant_user_docker_membership":
   unless => "grep -q 'docker\\S*vagrant' /etc/group",
   command => "usermod -aG docker vagrant",
-  require => User['vagrant'],
+  require => User[$user],
+}
+
+# Clone oh-my-zsh
+vcsrepo { "/home/vagrant/.oh-my-zsh":
+    ensure   => latest,
+    owner    => $user,
+    group    => $user,
+    provider => git,
+    require => [Package['git'], Package['zsh'], Package['curl'], Exec['vagrant_user_docker_membership']],
+    source   => "http://github.com/robbyrussell/oh-my-zsh.git",
+    revision => 'master',
+}
+
+vcsrepo { "/home/vagrant/Dotfiles":
+    ensure   => latest,
+    owner    => vagrant,
+    group    => vagrant,
+    provider => git,
+    require => [Package['git'], Package['zsh'], Package['curl'], Exec['vagrant_user_docker_membership']],
+    source   => "https://github.com/mattsgarrison/Dotfiles.git",
+    revision => 'master',
+}
+
+file { 'symlink_custom_rakefile':
+  target => '/home/vagrant/Dotfiles/Rakefile',
+  ensure => 'link',
+  group   => $user,
+  owner   => $user,
+  path => '/home/vagrant/Rakefile', #requires fully qualified path
+  require => Vcsrepo["/home/vagrant/Dotfiles"],
+}
+
+
+# install Neobundle for VIM
+file { '/home/vagrant/.vim':
+    ensure  => directory,
+    group   => $user,
+    owner   => $user,
+}
+vcsrepo { "/home/vagrant/.vim/bundle/neobundle.vim":
+    ensure   => latest,
+    owner    => $user,
+    group    => $user,
+    provider => git,
+    require => [Package['git'], Package['zsh'], Package['curl'], Exec['vagrant_user_docker_membership']],
+    source   => "git://github.com/Shougo/neobundle.vim",
+    revision => 'master',
 }
 
 # --- Ruby ---------------------------------------------------------------------
 
-# Install Ruby dependencies
-
-package { ['bison', 'openssl', 'libreadline6','libreadline6-dev', 'git-core',
- 'zlib1g', 'zlib1g-dev', 'libssl-dev', 'libyaml-dev', 'libxml2-dev', 'autoconf',
- 'libxslt1-dev', 'libc6-dev', 'libncurses5-dev', 'automake', 'libtool']:
-  ensure => installed
-}
 
 class { 'rbenv': }->rbenv::plugin { [ 'sstephenson/rbenv-vars', 'sstephenson/ruby-build' ]: }
-rbenv::build { '2.0.0-p247': global => true }->
-rbenv::gem { 'bundler': ruby_version => '2.0.0-p247' }->
-rbenv::gem { 'pry': ruby_version => '2.0.0-p247' }
+rbenv::build { $ruby_version: global => true }->
+rbenv::gem { 'rake': ruby_version => $ruby_version }->
+rbenv::gem { 'bundler': ruby_version => $ruby_version }->
+rbenv::gem { 'pry': ruby_version => $ruby_version }
 
 # Configure RBenv systemwide
 
@@ -213,10 +291,6 @@ exec {"add_profile_to_zsh":
   command => "echo '. /etc/profile' >> /etc/zsh/zshrc",
   require => Exec['rbenv_make_exec'],
 }
-# exec {"rbenv_source_it":
-#   command => "source /etc/profile.d/rbenv.sh",
-#   require => Exec['rbenv_make_exec'],
-# }
 
 
 # ---  Install PhantomJS -------------------------------------------------------
@@ -250,3 +324,8 @@ host { 'rails.dev':
     ip => '127.0.0.1',
 }
 
+# exec {"custom_dotfiles_link":
+#   cwd     => $home,
+#   command => "rake dotfiles:link",
+#   require => [File["symlink_custom_rankfile"], Class['rbenv']],
+# }

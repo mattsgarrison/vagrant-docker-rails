@@ -1,10 +1,15 @@
-# docker build -t="rails" .
-
+MAINTAIER Matt S. Garrison matt@mattsgarrison.com
 FROM ubuntu
 
 RUN apt-get update
 
 RUN apt-get install -y vim aptitude
+
+## CREATE USER
+
+RUN useradd -d /home/deployer -m deployer
+RUN chown -R deployer:deployer /home/deployer
+
 ## MYSQL
 #RUN apt-get install -y -q mysql-client libmysqlclient-dev 
 
@@ -46,21 +51,25 @@ RUN cd /tmp/ruby-2.0.0-p247;make
 RUN cd /tmp/ruby-2.0.0-p247;make install
 ADD ./templates/environment /etc/environment
 
-## RAILS
+## INSTALL RAILS
 RUN gem install rails --no-ri --no-rdoc
-RUN gem install passenger bundler
-## RAILS APP
+RUN gem install passenger bundler --no-ri --no-rdoc
+## INSTALL RAILS APP
 #ADD ./docker-rails /srv/docker-rails
 RUN git clone https://github.com/IconoclastLabs/teamweb.git /srv/teamweb-rails
-# git@github.com:IconoclastLabs/teamweb.git /srv/teamweb-rails
+## BUNDLE GEMS
 RUN cd /srv/teamweb-rails;bundle install
+
 RUN cd /srv/teamweb-rails;rake db:migrate
-#RUN cd /srv/teamweb-rails; passenger start
+
+## SET FOLDER PERMISSIONS
+RUN chown -R deployer:deployer /srv/teamweb-rails
+
+## EXPOSE THE CORRECT PORT (host will proxy this)
 EXPOSE 3000
 
-
 # Tell apt to stop automatically updating NGINX
-#RUN aptitude hold nginx-full
+RUN aptitude hold nginx-full
 #RUN easy_install supervisor
 #RUN echo_supervisord_conf > /etc/supervisord.conf
 #RUN printf "[include]\nfiles = /srv/teamweb-rails/Supervisorfile\n" >> /etc/supervisord.conf
@@ -68,4 +77,5 @@ EXPOSE 3000
 #CMD ["/usr/local/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
 #CMD ["/bin/bash/"]
 
-CMD ["/usr/local/bin/passenger", "start", "/srv/teamweb-rails/"]
+
+CMD ["su", "-", "deployer", "/usr/local/bin/passenger", "start", "/srv/teamweb-rails/"]
