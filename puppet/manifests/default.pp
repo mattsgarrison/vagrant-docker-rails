@@ -190,16 +190,16 @@ group { "docker":
   }
 
 # --- Manage the vagrant user --------------------------------------------------
-user { $user:
+user { 'vagrant':
   ensure     => "present",
-  home    => $home,
+  home    => '/home/vagrant',
   managehome => true,
   shell => "/bin/zsh"
 }
-file { $home:
+file { '/home/vagrant':
     ensure  => directory,
-    group   => $user,
-    owner   => $user,
+    group   => vagrant,
+    owner   => vagrant,
     mode    => 0700,
 }
 
@@ -212,8 +212,8 @@ exec {"vagrant_user_docker_membership":
 # Clone oh-my-zsh
 vcsrepo { "/home/vagrant/.oh-my-zsh":
     ensure   => latest,
-    owner    => $user,
-    group    => $user,
+    owner    => vagrant,
+    group    => vagrant,
     provider => git,
     require => [Package['git'], Package['zsh'], Package['curl'], Exec['vagrant_user_docker_membership']],
     source   => "http://github.com/robbyrussell/oh-my-zsh.git",
@@ -233,8 +233,8 @@ vcsrepo { "/home/vagrant/Dotfiles":
 file { 'symlink_custom_rakefile':
   target => '/home/vagrant/Dotfiles/Rakefile',
   ensure => 'link',
-  group   => $user,
-  owner   => $user,
+  group   => vagrant,
+  owner   => vagrant,
   path => '/home/vagrant/Rakefile', #requires fully qualified path
   require => Vcsrepo["/home/vagrant/Dotfiles"],
 }
@@ -243,13 +243,13 @@ file { 'symlink_custom_rakefile':
 # install Neobundle for VIM
 file { '/home/vagrant/.vim':
     ensure  => directory,
-    group   => $user,
-    owner   => $user,
+    group   => vagrant,
+    owner   => vagrant,
 }
 vcsrepo { "/home/vagrant/.vim/bundle/neobundle.vim":
     ensure   => latest,
-    owner    => $user,
-    group    => $user,
+    owner    => vagrant,
+    group    => vagrant,
     provider => git,
     require => [Package['git'], Package['zsh'], Package['curl'], Exec['vagrant_user_docker_membership']],
     source   => "git://github.com/Shougo/neobundle.vim",

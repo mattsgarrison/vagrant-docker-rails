@@ -1,5 +1,5 @@
-MAINTAIER Matt S. Garrison matt@mattsgarrison.com
 FROM ubuntu
+MAINTAINER Matt S. Garrison <matt@mattsgarrison.com>
 
 RUN apt-get update
 
@@ -34,7 +34,7 @@ RUN apt-get install -y nodejs
 ## MEMCACHED
 RUN apt-get install -y -q memcached
 
-## REDIS
+## REDIS for background queues
 RUN apt-get install -y -q redis-server
 ## MAGICK
 RUN apt-get install -y -q imagemagick
@@ -77,5 +77,5 @@ RUN aptitude hold nginx-full
 #CMD ["/usr/local/bin/supervisord", "-n", "-c", "/etc/supervisord.conf"]
 #CMD ["/bin/bash/"]
 
-
+ENTRYPOINT ["/srv/teamweb-rails/"]
 CMD ["su", "-", "deployer", "/usr/local/bin/passenger", "start", "/srv/teamweb-rails/"]
