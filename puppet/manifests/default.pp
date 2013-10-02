@@ -202,7 +202,7 @@ file { '/home/vagrant':
     owner   => vagrant,
     mode    => 0700,
 }
-
+# sudo gpasswd -a vagrant docker
 exec {"vagrant_user_docker_membership":
   unless => "grep -q 'docker\\S*vagrant' /etc/group",
   command => "usermod -aG docker vagrant",
